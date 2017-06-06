@@ -3,3 +3,4 @@ urwid
 paramiko
 redis
 wcwidth
+cryptography

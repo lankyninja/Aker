@@ -79,12 +79,17 @@ Python Modules:
 		git clone https://github.com/aker-gateway/Aker.git /usr/bin/aker/
 		~~~
 		
-		* Install dependencies (adapt for Ubuntu)
+		* Install dependencies
 			~~~
 			yum -y install epel-release 
 			yum -y install python2-paramiko python-configparser python-redis python-urwid python2-wcwidth redis
 			~~~
 
+		* Ubuntu dependencies
+			~~~
+			apt-get install -y python-pip python-dev
+			pip install -r requirements.txt
+			~~~
 
 		* Set files executable perms
 	      ```
