@@ -79,11 +79,7 @@ celerybeat-schedule
 .env
 
 # virtualenv
-venv/
-ENV/
-local/
-include/
-bin/
+aker-venv/
 
 # sublime 
 *.sublime-*
