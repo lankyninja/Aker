@@ -21,11 +21,13 @@ class Host(object):
 	
 	name: FQDN of server
 	ssh_port: server ssh port , default is 22
+	categories: list of categories that the host belongs to
 	"""
 	
-	def __init__(self, name, ssh_port=22):
+	def __init__(self, name, ssh_port=22, categories = []):
 		self.fqdn = name
 		self.ssh_port = ssh_port
+		self.categories = categories
    
 	def equal(self,server):
 		if self.fqdn == server.fqdn and self.ssh_port == server.ssh_port:
@@ -39,6 +41,9 @@ class Host(object):
 	def __iter__(self):
 		return self
 
+	def addCategory(self,category):
+		if category not in self.categories:
+			self.categories.append(category)
 
 
 class Hosts(object):
@@ -50,7 +55,9 @@ class Hosts(object):
 	The responsibility of defining HBAC (hosts allowed to the user) lies on the
 	underlaying identity provider .
 	"""
-	def __init__(self,config,username,gateway_hostgroup,idp):
+	def __init__(self,config,username,gateway_hostgroup,idp,rule_engine):
+		# This will handle the association and matching of categories
+		self.categories_engine = rule_engine
 		self._allowed_ssh_hosts = []
 		self.user = username
 		# username is the redis key, well kinda 
@@ -136,7 +143,18 @@ class Hosts(object):
 			return self._allowed_ssh_hosts
 		else:
 			del self._allowed_ssh_hosts[:]
+
 			self._allowed_ssh_hosts = self.idp.list_allowed()
+
+			for host in self._allowed_ssh_hosts:
+				for category in self.categories_engine.getCategories():
+					for rule in category.rules:
+						Rule = self.categories_engine.getRule(rule.type)
+						if Rule is not None and Rule.hostMatches(host=hostentry,rule=rule):
+							logging.debug("%s matches rule: %s",rule)
+							host.addCategory(category)
+							break
+
 			if self.redis is not None :
 				self._save_hosts_to_cache(self._allowed_ssh_hosts)
 			return self._allowed_ssh_hosts

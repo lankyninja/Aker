@@ -31,6 +31,7 @@ from configparser import ConfigParser,NoOptionError
 import time
 
 from hosts import Hosts
+from categories import CategoryRuleEngine
 import tui
 from session import SSHSession
 from snoop import SSHSniffer
@@ -72,7 +73,9 @@ class User(object):
 		gateway_hostgroup = config.get('gateway_group')
 		idp = config.get('idp')
 		logging.debug("Core: using Identity Provider {0}".format(idp))
-		self.hosts = Hosts(config,self.name,gateway_hostgroup,idp)
+		self.rule_engine = CategoryRuleEngine(config)
+		self.hosts = Hosts(config,self.name,gateway_hostgroup,idp,self.rule_engine)
+		# self.rule_engine.
 		self.allowed_ssh_hosts = self.hosts.list_allowed()
 
 
