@@ -87,7 +87,7 @@ Python Modules:
 
 		* Ubuntu dependencies
 			~~~
-			apt-get install -y python-pip python-dev
+			apt-get install -y build-essential libssl-dev libffi-dev python-dev python-pip
 			pip install -r requirements.txt
 			~~~
 
