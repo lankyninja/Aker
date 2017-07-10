@@ -1,48 +1,30 @@
 {
-  "test": [
-    {
-      "type": "CIDR",
-      "rules": [
-        "192.168.1.1/24",
-        "125.87.22.8"
-      ]
-    },
-    {
-      "type": "REGEX",
-      "target": "hostname",
-      "rules": [
-        ".*\\.example\\.local"
-      ]
-    },
-    {
-      "type": "REGEX",
-      "target": "name",
-      "rules": [
-        "(LOCAL|example)-app-[0-9]2"
-      ]
-    }
-  ],
-  "some-client": [
-    {
-      "type": "CIDR",
-      "rules": [
-        "125.88.0.0/16",
-        "125.87.0.0/16"
-      ]
-    },
-    {
-      "type": "REGEX",
-      "target": "hostname",
-      "rules": [
-        ".*\\.(secure|private)\\.some-client.com"
-      ]
-    },
-    {
-      "type": "REGEX",
-      "target": "fqdn",
-      "rules": [
-        ".*\\.ipa\\.example"
-      ]
-    }
-  ]
+	"test":[
+		{
+			"type":"network",
+			"rules":["192.168.1.1/24","125.87.22.8"]
+		},
+		{
+			"type":"regex",
+			"target":"hostname" ,
+			"rules":[".*\.example\.local"]
+		},
+		{
+			"type":"regex",
+			"target":"name",
+			"rules":["(LOCAL|example)-app-[0-9]2"]
+		}
+	],
+	"some-client":[
+		{
+			"type":"network",
+			"rules":["125.88.0.0/16","125.87.0.0/16"]
+		},
+		{
+			"type":"regex",
+			"target":"hostname",
+			"rules":[".*\.(secure|private)\.some-client.com"]
+		}
+	]
 }
+
