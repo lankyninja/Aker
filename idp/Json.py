@@ -9,6 +9,7 @@
 from IdPFactory import IdP
 import json
 import logging
+from hosts import Host
 
 class Json(IdP):
 	'''
@@ -49,7 +50,7 @@ class Json(IdP):
 			if h.get("users") is not None:
 				for u in h.get("users"):
 				 	if self.user == u:
-						self.__add_host_to_allowed(h.get("hostname"))
+						self.__add_host_to_allowed(h)
 
 
 		if userGroups is not None:
@@ -57,15 +58,20 @@ class Json(IdP):
 				if h.get("groups") is not None:
 					for g in user.get("groups"):
 						if g in h.get("groups"):
-							self.__add_host_to_allowed(h.get("hostname"))
+							self.__add_host_to_allowed(h)
 
 	def __add_host_to_allowed(self,host):
 		'''
 		Add a unique host to the list of allowed hosts
 		'''
-		if host not in self._allowed_ssh_hosts:
-			logging.debug("Json: adding host {0} to allowed hosts".format(host))
-			self._allowed_ssh_hosts.insert(0,host)		
+		logging.debug("Json: adding host {0} to allowed hosts".format(host))
+		fqdn = host.get("hostname","")
+		port = host.get("port",22)
+		desc = host.get("name","")
+		key = host.get("key","")
+		tmpHost=Host(name=fqdn,description=desc,ssh_port=port,private_key_path=key)
+		if tmpHost not in self._allowed_ssh_hosts:
+			self._allowed_ssh_hosts.insert(0,tmpHost)		
 
 	def list_allowed(self):
 		# is our list empty ?

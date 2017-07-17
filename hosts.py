@@ -24,10 +24,12 @@ class Host(object):
 	categories: list of categories that the host belongs to
 	"""
 	
-	def __init__(self, name, ssh_port=22, categories = []):
-		self.fqdn = name
-		self.ssh_port = ssh_port
+	def __init__(self, name,description="", ssh_port=22, private_key_path="",categories = []):
+		self.fqdn = str(name)
+		self.description=str(description)
+		self.ssh_port = int(ssh_port)
 		self.categories = categories
+		self.key_path = str(private_key_path)
    
 	def equal(self,server):
 		if self.fqdn == server.fqdn and self.ssh_port == server.ssh_port:
@@ -36,7 +38,7 @@ class Host(object):
 			return False
             
 	def __str__(self):
-		return "fqdn:%d, ssh_port:%d" % (self.fqdn, self.ssh_port)
+		return "fqdn:%s, ssh_port:%d" % (self.fqdn, self.ssh_port)
 		
 	def __iter__(self):
 		return self
@@ -87,7 +89,7 @@ class Hosts(object):
 				del self._allowed_ssh_hosts[:]
 				
 				for k,v in result.iteritems():
-					self._allowed_ssh_hosts.append(json.loads(v)['fqdn'])
+					self._allowed_ssh_hosts.append(json.loads(v))
 					cached = True
 			except Exception as e:
 				logging.error("Hosts: redis error: {0}".format(e.message))
@@ -109,12 +111,10 @@ class Hosts(object):
 		
 		for host in hosts:
 			try:
-				# Convert hosts we got from identity provider to our Host() object
-				hostentry= Host(host)
 				# Save to redis under $user:hosts
-				self.redis.hset(self.user_cache_key,hostentry.fqdn,json.dumps(vars(hostentry)))
+				self.redis.hset(self.user_cache_key,host.fqdn,json.dumps(vars(host)))
 				logging.debug("Hosts: adding host {0} to cache".format(host))
-				hostentry = None
+				host = None
 			except Exception as e:
 				logging.error("Hosts: error saving to cache : {0}".format(e.message))
 		
@@ -150,8 +150,8 @@ class Hosts(object):
 				for category in self.categories_engine.getCategories():
 					for rule in category.rules:
 						Rule = self.categories_engine.getRule(rule.type)
-						if Rule is not None and Rule.hostMatches(host=hostentry,rule=rule):
-							logging.debug("%s matches rule: %s",rule)
+						if Rule is not None and Rule.hostMatches(host=host,rule=rule):
+							logging.debug("Host matches rule")
 							host.addCategory(category)
 							break
 

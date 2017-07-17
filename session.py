@@ -24,7 +24,7 @@ class Session(object):
 		self.aker= aker_core
 		self.host = host
 		self.host_user = self.aker.user.name
-		self.host_port = int(self.aker.port)
+		self.host_port = int(self.host.ssh_port)
 		self.src_port = self.aker.config.src_port
 		self.uuid = uuid
 		logging.debug("Session: Base Session created")
@@ -38,8 +38,8 @@ class Session(object):
 		
 			
 	def connect(self, size):
-		self._client.connect(self.host, self.host_port, size)
-        
+		self._client.connect(self.host.fqdn, self.host_port, size)
+		
 	def start_session(self):
 		raise NotImplementedError
 		
@@ -65,7 +65,10 @@ class SSHSession(Session):
 		
 	def start_session(self):
 		try:
-			auth_secret = self.aker.user.get_priv_key()
+			if self.host.key_path is None or self.host.key_path == "":
+				auth_secret = self.aker.user.get_priv_key()
+			else:
+				auth_secret = self.aker.user.get_priv_key(self.host.key_path)
 		# currently, if no SSH public key exists, an ``Exception``
 		# is raised.  Catch it and try a password.
 		except Exception as exc:

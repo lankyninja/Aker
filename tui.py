@@ -17,21 +17,21 @@ import os
 from popup import SimplePopupLauncher
 
 class MenuItem(urwid.Text):
-    def __init__(self, caption):
-        urwid.Text.__init__(self, caption)
-        urwid.register_signal(self.__class__, ['connect'])
+	def __init__(self, caption):
+		urwid.Text.__init__(self, caption)
+		urwid.register_signal(self.__class__, ['connect'])
 
-        
-    def keypress(self, size, key):
-        if key == 'enter':
-            urwid.emit_signal(self, 'connect')
-        else:
-            return key
-            
-    def selectable(self):
-        return True 
+		
+	def keypress(self, size, key):
+		if key == 'enter':
+			urwid.emit_signal(self, 'connect')
+		else:
+			return key
+			
+	def selectable(self):
+		return True 
 
-    
+	
 class Window(object):
 	""" Where all the Tui magic happens,
 		handles creating urwid widgets and
@@ -40,39 +40,39 @@ class Window(object):
 	
 	def __init__(self,aker_core):   
 		self.aker = aker_core
-		self.draw()
 	
 	
 	def refresh_hosts(self,hosts):
 		body = []
-		for hostname in hosts:
-			host = MenuItem("%s" % (hostname))
-			urwid.connect_signal(host, 'connect', self.host_chosen, hostname) # host chosen action
-			body.append(urwid.AttrMap(host,'body', focus_map='SSH_focus'))
+		for host in hosts:
+			if not str.isspace(host.description) and host.description != "":
+				hostitem = MenuItem("%s (%s)" % (host.description,host.fqdn))
+			else:
+				hostitem = MenuItem("%s" % (host.fqdn))
+			urwid.connect_signal(hostitem, 'connect', self.host_chosen, host) # host chosen action
+			body.append(urwid.AttrMap(hostitem,'body', focus_map='SSH_focus'))
 		return urwid.ListBox(urwid.SimpleFocusListWalker(body))
 	
 	def host_chosen(self,choice):
 		username = self.aker.user.name
-		# TODO: per host port
-		port = self.aker.port
 		logging.debug("TUI: user %s chose server %s " % (username,choice))
 		self.loop.draw_screen()
 		self.aker.init_connection(choice)
 		
-    
-    
+	
+	
 	def draw(self):
 		self.palette = [
-            ('body', 'black', 'light gray'),  # Normal Text
-            ('focus', 'light green', 'black', 'standout'),  # Focus
-            ('head', 'white', 'dark gray', 'standout'),  # Header
-            ('foot', 'light gray', 'dark gray'),  # Footer Separator
-            ('key', 'light green', 'dark gray', 'bold'),
-            ('title', 'white', 'black', 'bold'),
-            ('popup', 'white', 'dark red'),
-            ('msg', 'yellow', 'dark gray'),
-            ('SSH', 'dark blue', 'light gray', 'underline'),
-            ('SSH_focus', 'light green', 'dark blue', 'standout')] # Focus
+			('body', 'black', 'light gray'),  # Normal Text
+			('focus', 'light green', 'black', 'standout'),  # Focus
+			('head', 'white', 'dark gray', 'standout'),  # Header
+			('foot', 'light gray', 'dark gray'),  # Footer Separator
+			('key', 'light green', 'dark gray', 'bold'),
+			('title', 'white', 'black', 'bold'),
+			('popup', 'white', 'dark red'),
+			('msg', 'yellow', 'dark gray'),
+			('SSH', 'dark blue', 'light gray', 'underline'),
+			('SSH_focus', 'light green', 'dark blue', 'standout')] # Focus
 		
 		
 		self.header_text = [
@@ -81,24 +81,24 @@ class Window(object):
 			('key', "%s" % self.aker.posix_user), " "]
 		
 		self.footer_text = [
-            ('msg', "Move:"),
-            ('key', "Up"), ",", ('key', "Down"), ",",
-            ('key', "PgUp"), ",",
-            ('key', "PgDn"), ",",
-            ('msg', "Select:"),
-            ('key', "Enter"), " ",
-            ('msg', "Refresh:"),
-            ('key', "F5"), " ",
-            ('msg', "Quit:"),
-            ('key', "F9"), " ",
-            ('msg', "By:"),
-            ('key', "Ahmed Nazmy")]
-        
+			('msg', "Move:"),
+			('key', "Up"), ",", ('key', "Down"), ",",
+			('key', "PgUp"), ",",
+			('key', "PgDn"), ",",
+			('msg', "Select:"),
+			('key', "Enter"), " ",
+			('msg', "Refresh:"),
+			('key', "F5"), " ",
+			('msg', "Quit:"),
+			('key', "F9"), " ",
+			('msg', "By:"),
+			('key', "Ahmed Nazmy")]
+		
 		# Hosts ListBox 
 		self.hosts_listbox = self.refresh_hosts(self.aker.user.allowed_ssh_hosts)
 		self.hosts_map = urwid.AttrWrap(self.hosts_listbox,'body')
 		
-        # Edit Text area to capture user input    
+		# Edit Text area to capture user input    
 		self.search_edit = urwid.Edit("Type to search:\n")
 		urwid.connect_signal(self.search_edit, 'change', self.search_change, self.hosts_listbox) # search field change action
 		
