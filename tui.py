@@ -51,7 +51,7 @@ class Window(object):
 				hostitem = MenuItem("%s" % (host.fqdn))
 			urwid.connect_signal(hostitem, 'connect', self.host_chosen, host) # host chosen action
 			body.append(urwid.AttrMap(hostitem,'body', focus_map='SSH_focus'))
-		return urwid.ListBox(urwid.SimpleFocusListWalker(body))
+		return body
 	
 	def host_chosen(self,choice):
 		username = self.aker.user.name
@@ -95,7 +95,7 @@ class Window(object):
 			('key', "Ahmed Nazmy")]
 		
 		# Hosts ListBox 
-		self.hosts_listbox = self.refresh_hosts(self.aker.user.allowed_ssh_hosts)
+		self.hosts_listbox = urwid.ListBox(urwid.SimpleFocusListWalker(self.refresh_hosts(self.aker.user.allowed_ssh_hosts)))
 		self.hosts_map = urwid.AttrWrap(self.hosts_listbox,'body')
 		
 		# Edit Text area to capture user input    
@@ -132,11 +132,12 @@ class Window(object):
 	def search_change(self,edit, text, list):
 		logging.debug("TUI: search edit key <{0}>".format(text))
 		del list.body[:] # clear listbox
+		tmpList = []
 		for hostentry in self.aker.user.allowed_ssh_hosts:
-			if text in hostentry:
-				host = MenuItem("%s" % (hostentry))
-				urwid.connect_signal(host, 'connect', self.host_chosen, hostentry)
-				list.body.append(urwid.AttrMap(host, 'body', focus_map='SSH_focus'))
+			if text in hostentry.fqdn or text in hostentry.description:
+				tmpList.append(hostentry)
+		for a in self.refresh_hosts(tmpList):
+			list.body.append(a)
 				
 
 	def update_search_edit(self,key):
