@@ -79,10 +79,13 @@ class User(object):
 		self.allowed_ssh_hosts = self.hosts.list_allowed()
 
 
-	def get_priv_key(self):
+	def get_priv_key(self,file_path=""):
 		try :
 			#TODO: check better identity options
-			privkey = paramiko.RSAKey.from_private_key_file(os.path.expanduser("~/.ssh/id_rsa"))
+			if file_path != "":
+				privkey = paramiko.RSAKey.from_private_key_file(os.path.expanduser(file_path))
+			else:	
+				privkey = paramiko.RSAKey.from_private_key_file(os.path.expanduser("~/.ssh/id_rsa"))
 		except Exception as e:
 			logging.error("Core: Invalid Private Key for user {0} : {1} ".format(self.name, e.message))
 			raise Exception("Core: Invalid Private Key")
