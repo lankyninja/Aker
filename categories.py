@@ -123,8 +123,8 @@ class RegexRule(Rule):
 
         for rule in rules:
             logging.debug("REGEX: Matching %s against %s",target,str(rule))
-            re.compile(str(rule))
-            if re.match(target) is not None:
+            pattern=re.compile(str(rule))
+            if re.match(pattern,target) is not None:
                 return True
 
         return False
